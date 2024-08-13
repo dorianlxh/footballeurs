@@ -1,0 +1,175 @@
+/*
+Requête Sparql dbpedia
+Ma Liste: https://en.wikipedia.org/wiki/List_of_Real_Madrid_CF_players
+*/
+
+--retourne les joueurs du real madrid et leurs positions
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?player ?position
+WHERE {
+  ?player a dbo:SoccerPlayer ;
+          dbo:team dbr:Real_Madrid_CF ;
+          dbo:position ?position .
+}
+
+
+--Retourne le résumé des joueurs
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?player ?abstract
+WHERE {
+  ?player a dbo:SoccerPlayer ;
+          dbo:team dbr:Real_Madrid_CF ;
+          dbo:abstract ?abstract .
+FILTER(LANG(?abstract) = "fr")
+}
+
+
+--Retourne la taille des joueurs
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?player ?taille
+WHERE {
+  ?player a dbo:SoccerPlayer ;
+          dbo:team dbr:Real_Madrid_CF ;
+          dbo:height ?taille .
+}
+
+
+
+--Retourne tout les clubs dans lesquelles les joueurs de la liste ont joués
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?player ?team
+WHERE {
+  ?player a dbo:SoccerPlayer ;
+          dbo:team dbr:Real_Madrid_CF ;
+          dbo:team ?team .
+}
+
+
+
+--Listes des propriétés (codes avec notes)
+
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+ SELECT ?p1 (COUNT(*) as ?eff) ('     ' AS ?notes)
+ WHERE { 
+    {
+         {dbr:Real_Madrid_CF ?p ?o1.}
+ 
+}
+?o1 a dbo:SoccerPlayer;
+ dbp:birthDate | dbo:birthDate ?birthDate;
+    ?p1 ?o2.
+ BIND(xsd:integer(SUBSTR(STR(?birthDate), 1, 4)) AS ?birthYear)
+ FILTER ( (?birthYear >= 1800  )) 
+  }
+ GROUP BY ?p1
+ ORDER BY DESC(?eff)
+ 
+ 
+-- Récupère les clubs de jeunesse (club de formation)
+ 
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbp: <http://dbpedia.org/property/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?player ?youthClub 
+WHERE {
+  ?player a dbo:SoccerPlayer ;
+dbo:team dbr:Real_Madrid_CF ;
+dbp:youthclubs ?youthClub .
+}
+
+
+-- Test, volonté de récupérer les identifiants wikidata de chaque joueur de ma liste puis de chercher leur nationalité sportive dans wikidata.
+
+-- Ici, test avec CR7, il faudra surement faire une boucle en python pour récuperer ceux de toute ma liste
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?wikidataId
+WHERE {
+  dbr:Cristiano_Ronaldo owl:sameAs ?wikidataId .
+  FILTER(STRSTARTS(STR(?wikidataId), "http://www.wikidata.org/entity/Q"))
+}
+-- Retourne : http://www.wikidata.org/entity/Q11571
+
+
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT (REPLACE(STR(?wikidataId), "http://www.wikidata.org/entity/", "") AS ?playerQ)
+WHERE {
+  dbr:Cristiano_Ronaldo owl:sameAs ?wikidataId .
+  FILTER(STRSTARTS(STR(?wikidataId), "http://www.wikidata.org/entity/Q"))
+}
+-- Retourne Q11571
+
+/*PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+
+SELECT ?player
+WHERE {
+  ?player dbo:team dbr:Real_Madrid_CF ;
+          a dbo:SoccerPlayer .
+}*/
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+
+SELECT (REPLACE(STR(?player), "http://dbpedia.org/resource/", "") AS ?playerName)
+WHERE {
+  ?player dbo:team dbr:Real_Madrid_CF ;
+          a dbo:SoccerPlayer .
+}
+
+
+-- Récupère les uri des joueurs. Retourne : http://dbpedia.org/resource/Cristiano_Ronaldo Il faudrait parser l'url pour ne garder que la fin (fait).
+
+SELECT ?nationalitySportLabel WHERE {
+  wd:Q11571 p:P1532 ?statement.
+  ?statement ps:P1532 ?nationalitySport.
+  ?nationalitySport rdfs:label ?nationalitySportLabel.
+  FILTER(LANG(?nationalitySportLabel) = "en")
+}
+
+-- Requête wikidata retournant la nationalité sportive de cristiano ronaldo, le wd sera à changer par l'identifiant de chaque joueur.
+
+SELECT ?player ?playerLabel ?nationalityLabel WHERE {
+  ?player wdt:P54 wd:Q8682;    # Propriété P54 pour l'équipe (Real Madrid)
+          wdt:P106 wd:Q937857. # Propriété P106 pour l'occupation
+  ?player wdt:P1532 ?nationality.# Propriété P1532 pour la nationalité
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+}
+-- Retourne sur wikidata les nationalités sportives. (j'avais tout coder en python bref...) Ronaldo n'est pas dans la liste car son occupation n'est pas footballeur apparement donc je vais utilser mon script python pour retourner la nationalité de cr7 uniquement
+
+
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+
+SELECT (REPLACE(STR(?player), "http://dbpedia.org/resource/", "") AS ?playerName) (REPLACE(STR(?wikidataId), "http://www.wikidata.org/entity/", "") AS ?playerQ)
+WHERE {
+  ?player dbo:team dbr:Real_Madrid_CF ;
+          a dbo:SoccerPlayer ;
+          owl:sameAs ?wikidataId .
+  FILTER(STRSTARTS(STR(?wikidataId), "http://www.wikidata.org/entity/"))
+}
+-- Retourne les uri dbpedia ainsi que les uri wikidata des joueurs de ma liste

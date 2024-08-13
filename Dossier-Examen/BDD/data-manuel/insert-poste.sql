@@ -1,0 +1,16 @@
+INSERT INTO tblPostes (nom) VALUES 
+('Gardien de but'),
+('Defenseur central'),
+('Arriere droit'),
+('Arriere gauche'),
+('Defenseur lateral'),
+('Milieu defensif'),
+('Milieu central'),
+('Milieu offensif'),
+('Milieu lateral'),
+('Ailier Droit'),
+('Ailier Gauche'),
+('Avant-centre'),
+('Attaquant de soutien'),
+('Buteur'),
+('Attaquant lateral');

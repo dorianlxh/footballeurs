@@ -1,0 +1,11 @@
+numero,nom,prenom,ddn,taille,num_tblPersonne_estParentDe,num_tblPays,num_tblPostes
+1,Messi,Lionel,1987-06-24,1.70,,1,11
+2,Ronaldo,Cristiano,1985-02-05,1.87,,2,14
+3,Mbappe,Kylian,1998-12-20,1.78,,3,14
+4,Neymar,"Neymar Jr.",1992-02-05,1.75,,4,10
+5,"De Bruyne",Kevin,1991-06-28,1.81,,5,8
+6,Lewandowski,Robert,1988-08-21,1.85,,6,14
+7,"Van Dijk",Virgil,1991-07-08,1.93,,6,2
+8,Ramos,Sergio,1986-03-30,1.84,,8,2
+9,Salah,Mohamed,1992-06-15,1.75,,9,10
+10,Benzema,Karim,1987-12-19,1.85,,10,14
